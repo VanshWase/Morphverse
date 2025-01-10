@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About InSightBot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='about.css') }}">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="InSightBot Logo">
+      </div>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('features') }}">Features</a></li>
+        <li><a href="{{ url_for('insight') }}">Insights</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="content">
+    <h1>About InSightBot</h1>
+    <p><strong>InSightBot</strong> is an innovative chatbot designed to revolutionize the way users interact with data and insights. Built on cutting-edge AI and natural language processing (NLP) technologies, InSightBot simplifies complex tasks by providing clear, actionable insights through an intuitive and user-friendly interface.</p>
+
+    <h2>Our Mission</h2>
+    <p>Our mission is to empower individuals and organizations by delivering intelligent, real-time solutions that enhance productivity, decision-making, and user experience.</p>
+
+    <h2>Key Features</h2>
+    <ul>
+      <li><strong>AI-Powered Conversations</strong>: Seamless and natural interactions for users to access insights quickly.</li>
+      <li><strong>Customizable Solutions</strong>: Tailored to meet diverse industry requirements.</li>
+      <li><strong>Secure and Reliable</strong>: Built with robust security protocols to ensure data privacy and protection.</li>
+      <li><strong>Innovative Design</strong>: Intuitive interface for effortless navigation and usability.</li>
+    </ul>
+
+    <h2>Why InSightBot?</h2>
+    <p>InSightBot bridges the gap between data and actionable knowledge. Whether it's analyzing trends, offering personalized suggestions, or simplifying workflows, InSightBot transforms complex data into meaningful insights that drive results.</p>
+
+    <h2>Our Vision</h2>
+    <p>To redefine the way users interact with AI-powered tools by providing accessible, efficient, and scalable solutions that adapt to diverse needs.</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 InSightBot. All rights reserved.</p>
+  </footer>
+</body>
+</html>

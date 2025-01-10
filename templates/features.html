@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InSightBot - Features</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='features.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <header>
+      <nav class="navbar">
+        <div class="logo">
+          <img
+            src="{{ url_for('static', filename='img/logo.png') }}"
+            alt="InSightBot Logo"
+          />
+        </div>
+        <ul class="nav-links">
+          <li><a href="{{ url_for('index') }}">Home</a></li>
+          <li><a href="{{ url_for('features') }}">Features</a></li>
+          <li><a href="{{ url_for('insight') }}">Insights</a></li>
+          <li><a href="{{ url_for('about') }}">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="content">
+      <h1>Data Visualization</h1>
+
+      <!-- Filter Controls -->
+      <div class="filter-controls">
+        <select id="typeFilter">
+          <option value="all">All Types</option>
+          <option value="Reels">Reels</option>
+          <option value="Static Image">Static Image</option>
+          <option value="Carousel">Carousel</option>
+        </select>
+        <input type="date" id="dateFilter">
+      </div>
+
+      <!-- Charts Section -->
+      <div class="chart-container">
+        <div class="top-charts">
+          <canvas id="pieChart"></canvas>
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="bottom-chart">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Data Table Section -->
+      <div class="table-container">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              {% for column in data_columns %}
+              <th>{{ column }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data_rows %}
+            <tr>
+              {% for column in data_columns %}
+              <td>{{ row[column] }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <script>
+        const rawData = JSON.parse('{{ data_rows | tojson | safe }}');
+        let filteredData = [...rawData];
+
+        function updateCharts() {
+          const typeFilter = document.getElementById('typeFilter').value;
+          const dateFilter = document.getElementById('dateFilter').value;
+
+          filteredData = rawData.filter(row => {
+            const matchesType = typeFilter === 'all' || row.Type === typeFilter;
+            const matchesDate = !dateFilter || row.Date_Posted === dateFilter;
+            return matchesType && matchesDate;
+          });
+
+          // Update Pie Chart - Post Type Distribution
+          const typeCounts = {};
+          filteredData.forEach(row => {
+            typeCounts[row.Type] = (typeCounts[row.Type] || 0) + 1;
+          });
+
+          pieChart.data.labels = Object.keys(typeCounts);
+          pieChart.data.datasets[0].data = Object.values(typeCounts);
+          pieChart.update();
+
+          // Update Bar Chart - Engagement by Type
+          const engagementByType = {};
+          filteredData.forEach(row => {
+            if (!engagementByType[row.Type]) {
+              engagementByType[row.Type] = {
+                total: 0,
+                count: 0
+              };
+            }
+            engagementByType[row.Type].total += parseFloat(row.Engagement_Rate.replace('%', ''));
+            engagementByType[row.Type].count++;
+          });
+
+          const avgEngagement = Object.keys(engagementByType).map(type => ({
+            type,
+            avg: engagementByType[type].total / engagementByType[type].count
+          }));
+
+          barChart.data.labels = avgEngagement.map(item => item.type);
+          barChart.data.datasets[0].data = avgEngagement.map(item => item.avg);
+          barChart.update();
+
+          // Update Line Chart - Engagement Over Time
+          const sortedData = [...filteredData].sort((a, b) => new Date(a.Date_Posted) - new Date(b.Date_Posted));
+          
+          lineChart.data.labels = sortedData.map(row => row.Date_Posted);
+          lineChart.data.datasets[0].data = sortedData.map(row => parseFloat(row.Engagement_Rate.replace('%', '')));
+          lineChart.update();
+
+          // Update Table
+          updateTable(filteredData);
+        }
+
+        function updateTable(data) {
+          const tbody = document.querySelector('#dataTable tbody');
+          tbody.innerHTML = '';
+          
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            Object.values(row).forEach(value => {
+              const td = document.createElement('td');
+              td.textContent = value;
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+        }
+
+        // Initialize Charts
+        const pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
+          type: 'pie',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Post Type Distribution',
+              backgroundColor: ['#00bfff', '#1e90ff', '#4169e1'],
+              borderColor: '#ffffff',
+              borderWidth: 2,
+              data: []
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#ffffff',
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: 'Content Type Distribution',
+                color: '#ffffff',
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                }
+              }
+            }
+          }
+        });
+
+        const barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Average Engagement Rate by Type',
+              backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) {
+                  return null;
+                }
+                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                gradient.addColorStop(0, '#00bfff');
+                gradient.addColorStop(1, '#1e90ff');
+                return gradient;
+              },
+              borderColor: '#ffffff',
+              borderWidth: 1,
+              borderRadius: 5,
+              data: []
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#ffffff',
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: 'Engagement Analysis by Content Type',
+                color: '#ffffff',
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: '#ffffff'
+                },
+                title: {
+                  display: true,
+                  text: 'Engagement Rate (%)',
+                  color: '#ffffff'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: '#ffffff'
+                }
+              }
+            }
+          }
+        });
+
+        const lineChart = new Chart(document.getElementById('lineChart').getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Engagement Rate Over Time',
+              borderColor: '#00bfff',
+              backgroundColor: function(context) {
+                const chart = context.chart;
+                const {ctx, chartArea} = chart;
+                if (!chartArea) {
+                  return null;
+                }
+                const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                gradient.addColorStop(0, 'rgba(30, 144, 255, 0)');
+                gradient.addColorStop(1, 'rgba(0, 191, 255, 0.2)');
+                return gradient;
+              },
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true,
+              data: [],
+              pointBackgroundColor: '#ffffff',
+              pointBorderColor: '#00bfff',
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#ffffff',
+              pointHoverBorderColor: '#1e90ff'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: {
+                  color: '#ffffff',
+                  font: {
+                    size: 14
+                  }
+                }
+              },
+              title: {
+                display: true,
+                text: 'Engagement Trends Over Time',
+                color: '#ffffff',
+                font: {
+                  size: 16,
+                  weight: 'bold'
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: '#ffffff'
+                },
+                title: {
+                  display: true,
+                  text: 'Engagement Rate (%)',
+                  color: '#ffffff'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: '#ffffff'
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            }
+          }
+        });
+
+        // Add event listeners
+        document.getElementById('typeFilter').addEventListener('change', updateCharts);
+        document.getElementById('dateFilter').addEventListener('change', updateCharts);
+
+        // Initial render
+        updateCharts();
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InSightBot - Home</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="InSightBot Logo">
+      </div>
+      <ul class="nav-links">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('features') }}">Features</a></li>
+        <li><a href="{{ url_for('insight') }}">Insights</a></li>
+        <li><a href="{{ url_for('about') }}">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <h1>Unleashing Social Media Insights with Langflow and Astra DB</h1>
+      <p>Transform your social media strategy with AI-powered analytics. Get deep insights into your content performance and audience engagement using cutting-edge technology.</p>
+      <!-- <button class="cta">Get Started</button> -->
+    </div>
+    <div class="hero-image">
+      <img src="{{ url_for('static', filename='img/rb_2427.png') }}" alt="Hero Illustration">
+    </div>
+  </section>
+</body>
+</html>
