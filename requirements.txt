@@ -1,0 +1,5 @@
+flask
+dotenv
+os
+requests
+pandas
