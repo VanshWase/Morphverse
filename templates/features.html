@@ -86,7 +86,7 @@
 
           filteredData = rawData.filter(row => {
             const matchesType = typeFilter === 'all' || row.Type === typeFilter;
-            const matchesDate = !dateFilter || row.Date_Posted === dateFilter;
+            const matchesDate = !dateFilter || new Date(row.Date_Posted).toISOString().split('T')[0] === dateFilter;
             return matchesType && matchesDate;
           });
 

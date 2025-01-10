@@ -47,7 +47,7 @@ def insight():
 @app.route('/features')
 def features():
     # Path to the CSV file
-    csv_path = r'C:\Users\salvi\Desktop\langData_Bot\social_media_data.csv'
+    csv_path = r'static\social_media_data.csv'
     if not os.path.exists(csv_path):
         return "CSV file not found!", 404
 
