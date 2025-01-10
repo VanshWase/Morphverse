@@ -1,5 +1,5 @@
 flask
-pytthon-dotenv
+python-dotenv
 os
 requests
 pandas
